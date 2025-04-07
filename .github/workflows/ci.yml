@@ -1,85 +1,70 @@
-name: CI CD
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
-# jobs:
-#   CI:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v3
-
-#       - name: Setup Dockerhub
-#         uses: docker/login-action@v3
-#         with:
-#           username: ${{ secrets.DOCKERHUB_USERNAME }}
-#           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-#       - name: Build and Push Docker Image
-#         uses: docker/build-push-action@v5
-#         with:
-#           context: ./
-#           file: ./Dockerfile
-#           push: true
-#           tags: |
-#             webapp:v${{ github.run_number }}
-#             webapp:latest
-
-#       # - name: Setup Node
-#       #   uses: actions/setup-node@v3
-#       #   with:
-#       #     node-version: 18.x
-#       #     cache: 'npm'
-
-#       # - name: Install dependencies
-#       #   run: npm install
-
-#       # - name: Linting
-#       #   run: npm run lint
-
-#       # - name: Testing
-#       #   run: npm run test
-
-#       # - name: Build
-#       #   run: npm run build
 jobs:
+  # Continuous Integration (CI)
   CI:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # Setup Node.js environment
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
           cache: 'npm'
 
+      # Cache Node.js dependencies
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # Run linting
       - name: Linting
         run: npm run lint
 
+      # Run tests
       - name: Testing
         run: npm run test
 
+      # Build the application
+      - name: Build
+        run: npm run build
+
+  # Continuous Deployment (CD)
   CD:
     needs: CI
     runs-on: ubuntu-latest
     steps:
+      # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # Setup DockerHub credentials
       - name: Setup Dockerhub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # Build and push Docker image
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
@@ -87,5 +72,26 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            webapp:v${{ github.run_number }}
-            webapp:latest
+            geraldobl58/webapp:v${{ github.run_number }}
+            geraldobl58/webapp:latest
+
+  # Notifications
+  # Notify:
+  #   needs: [CI, CD]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Notify on success
+  #     - name: Notify Success
+  #       if: success()
+  #       uses: slackapi/slack-github-action@v1.23.0
+  #       with:
+  #         slack-message: '✅ CI/CD Pipeline completed successfully!'
+  #         slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+
+  #     # Notify on failure
+  #     - name: Notify Failure
+  #       if: failure()
+  #       uses: slackapi/slack-github-action@v1.23.0
+  #       with:
+  #         slack-message: '❌ CI/CD Pipeline failed. Please check the logs.'
+  #         slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}
