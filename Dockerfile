@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --frozen-lockfile
+RUN npm install
 
 # Copy the rest of the application code
 COPY . .
@@ -31,4 +31,4 @@ COPY --from=builder /app/package.json ./package.json
 EXPOSE 3000
 
 # Start the Next.js app in production mode
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
