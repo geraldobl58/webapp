@@ -81,50 +81,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Notify on success
-      - name: Notify Success via Email
+      - name: Notify Success
         if: success()
-        uses: actions/github-script@v6
+        uses: slackapi/slack-github-action@v1.23.0
         with:
-          script: |
-            const issueComment = context.payload.pull_request ? context.payload.pull_request.html_url : context.payload.head_commit.url;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.run_id,
-              body: `✅ CI/CD Pipeline completed successfully! Check details: ${issueComment}`
-            });
+          slack-message: '✅ CI/CD Pipeline completed successfully!'
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}
 
       # Notify on failure
-      - name: Notify Failure via Email
+      - name: Notify Failure
         if: failure()
-        uses: actions/github-script@v6
+        uses: slackapi/slack-github-action@v1.23.0
         with:
-          script: |
-            const issueComment = context.payload.pull_request ? context.payload.pull_request.html_url : context.payload.head_commit.url;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.run_id,
-              body: `❌ CI/CD Pipeline failed. Please check the logs: ${issueComment}`
-            });
-
-  # Notifications
-  # Notify:
-  #   needs: [CI, CD]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     # Notify on success
-  #     - name: Notify Success
-  #       if: success()
-  #       uses: slackapi/slack-github-action@v1.23.0
-  #       with:
-  #         slack-message: '✅ CI/CD Pipeline completed successfully!'
-  #         slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}
-
-  #     # Notify on failure
-  #     - name: Notify Failure
-  #       if: failure()
-  #       uses: slackapi/slack-github-action@v1.23.0
-  #       with:
-  #         slack-message: '❌ CI/CD Pipeline failed. Please check the logs.'
-  #         slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          slack-message: '❌ CI/CD Pipeline failed. Please check the logs.'
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}
