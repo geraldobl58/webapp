@@ -85,13 +85,21 @@ jobs:
         if: success()
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          slack-message: '✅ CI/CD Pipeline completed successfully!'
-          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "✅ CI/CD Pipeline completed successfully!"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
       # Notify on failure
       - name: Notify Failure
         if: failure()
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          slack-message: '❌ CI/CD Pipeline failed. Please check the logs.'
-          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "❌ CI/CD Pipeline failed. Please check the logs."
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
