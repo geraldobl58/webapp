@@ -75,55 +75,6 @@ jobs:
             geraldobl58/webapp:v${{ github.run_number }}
             geraldobl58/webapp:latest
 
-      # Configure GitHub Pages
-      - name: Configure GitHub Pages
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
-      # Deploy to GitHub Pages using Docker
-      - name: Deploy to GitHub Pages
-        run: |
-          # Create a temporary directory for the build
-          mkdir -p ./gh-pages
-
-          # Run the Docker container and copy the build files
-          docker run --name temp-container geraldobl58/webapp:latest
-          docker cp temp-container:/app/.next ./gh-pages/
-          docker cp temp-container:/app/public ./gh-pages/
-          docker rm temp-container
-
-          # Create a .nojekyll file to bypass GitHub Pages Jekyll processing
-          touch ./gh-pages/.nojekyll
-
-          # Create a simple server.js for GitHub Pages
-          cat > ./gh-pages/server.js << 'EOL'
-          const { createServer } = require('http');
-          const { parse } = require('url');
-          const next = require('next');
-
-          const dev = process.env.NODE_ENV !== 'production';
-          const app = next({ dev });
-          const handle = app.getRequestHandler();
-
-          app.prepare().then(() => {
-            createServer((req, res) => {
-              const parsedUrl = parse(req.url, true);
-              handle(req, res, parsedUrl);
-            }).listen(3000, (err) => {
-              if (err) throw err;
-              console.log('> Ready on http://localhost:3000');
-            });
-          });
-          EOL
-
-          # Deploy to gh-pages branch
-          cd gh-pages
-          git init
-          git add -A
-          git commit -m "Deploy to GitHub Pages"
-          git push -f https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
-
   # Notifications
   Notify:
     needs: [CI, CD]
