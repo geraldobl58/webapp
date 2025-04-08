@@ -89,8 +89,34 @@ jobs:
 
           # Run the Docker container and copy the build files
           docker run --name temp-container geraldobl58/webapp:latest
-          docker cp temp-container:/app/dist/. ./gh-pages/
+          docker cp temp-container:/app/.next/standalone ./gh-pages/
+          docker cp temp-container:/app/.next/static ./gh-pages/.next/
+          docker cp temp-container:/app/public ./gh-pages/
           docker rm temp-container
+
+          # Create a .nojekyll file to bypass GitHub Pages Jekyll processing
+          touch ./gh-pages/.nojekyll
+
+          # Create a simple server.js for GitHub Pages
+          cat > ./gh-pages/server.js << 'EOL'
+          const { createServer } = require('http');
+          const { parse } = require('url');
+          const next = require('next');
+
+          const dev = process.env.NODE_ENV !== 'production';
+          const app = next({ dev });
+          const handle = app.getRequestHandler();
+
+          app.prepare().then(() => {
+            createServer((req, res) => {
+              const parsedUrl = parse(req.url, true);
+              handle(req, res, parsedUrl);
+            }).listen(3000, (err) => {
+              if (err) throw err;
+              console.log('> Ready on http://localhost:3000');
+            });
+          });
+          EOL
 
           # Deploy to gh-pages branch
           cd gh-pages
