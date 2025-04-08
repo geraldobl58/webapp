@@ -89,8 +89,7 @@ jobs:
 
           # Run the Docker container and copy the build files
           docker run --name temp-container geraldobl58/webapp:latest
-          docker cp temp-container:/app/.next/standalone ./gh-pages/
-          docker cp temp-container:/app/.next/static ./gh-pages/.next/
+          docker cp temp-container:/app/.next ./gh-pages/
           docker cp temp-container:/app/public ./gh-pages/
           docker rm temp-container
 
@@ -123,7 +122,7 @@ jobs:
           git init
           git add -A
           git commit -m "Deploy to GitHub Pages"
-          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
+          git push -f https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git HEAD:gh-pages
 
   # Notifications
   Notify:
