@@ -54,4 +54,4 @@ jobs:
           manifests: |
             k8s/deployment.yaml
           images: |
-            geraldobl58/handson-nestjs:v${{ github.run_number }}
+            geraldobl58/webapp:v${{ github.run_number }}
