@@ -10,6 +10,7 @@
     "test": "jest --passWithNoTests --maxWorkers=50%",
     "test:watch": "jest --watch --maxWorkers=25%",
     "test:ci": "jest --runInBand",
+    "test:cov": "jest --coverage",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "prepare": "husky install"

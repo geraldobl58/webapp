@@ -1,0 +1,27 @@
+name: CI/CD Pipeline
+
+on:
+  workflow_call:
+
+jobs:
+  unit_test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup project
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install dependencies
+        run: npm tun test
+
+      - name: Run tests with coverage
+        run: npm run test:cov
