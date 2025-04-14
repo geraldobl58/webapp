@@ -3,7 +3,7 @@ run-name: Pipeline CI/CD executed by ${{ github.actor }} in ${{ github.run_numbe
 
 on:
   push:
-    branches: [main]
+    branches: [develop]
   # pull_request:
   #   branches: [main]
   workflow_dispatch:
@@ -56,8 +56,7 @@ jobs:
   # Test
   TESTS:
     needs: [CI]
-    uses: ./.github/workflows/test.yml@main
-
+    uses: ./.github/workflows/test.yml
     secrets: inherit
 
   # Continuous Deployment (CD)
