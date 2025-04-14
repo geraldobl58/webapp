@@ -87,7 +87,7 @@ jobs:
             geraldobl58/webapp:latest
 
   # Deploy
-  deploy-dvelopment:
+  deploy-development:
     needs: [CD]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
@@ -113,7 +113,7 @@ jobs:
 
   # Notifications
   Notify:
-    needs: [CI, Tests, CD]
+    needs: [CI, Tests, CD, deploy-development, deploy-staging, deploy-production]
     runs-on: ubuntu-latest
     steps:
       # Notify on success
