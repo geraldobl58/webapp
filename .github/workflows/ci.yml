@@ -89,7 +89,7 @@ jobs:
   # Deploy
   deploy-dvelopment:
     needs: [CD]
-    uses: ./.github/workflows/deploy.yml@main
+    uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
       environment-name: development
@@ -97,7 +97,7 @@ jobs:
 
   deploy-staging:
     needs: [CD]
-    uses: ./.github/workflows/deploy.yml@main
+    uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
       environment-name: staging
@@ -105,7 +105,7 @@ jobs:
 
   deploy-production:
     needs: [CD]
-    uses: ./.github/workflows/deploy.yml@main
+    uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
       environment-name: producao
