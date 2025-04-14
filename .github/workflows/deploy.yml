@@ -45,8 +45,6 @@ jobs:
       - name: Update Deployment
         run: sed -i "s|http://165.227.240.220|${{ vars.BASE_URL }}|g" k8s/deployment.yaml
 
-
-
       - name: Deploy to Kubernetes
         uses: azure/k8s-deploy@v5
         with:
@@ -55,3 +53,14 @@ jobs:
             k8s/deployment.yaml
           images: |
             geraldobl58/webapp:v${{ github.run_number }}
+
+      - name: Notify Deployment Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": "❌ ${{ inputs.environment-name }} Deployment Failed!\n\nEnvironment: ${{ inputs.environment-name }}\nCommit: ${{ github.sha }}\nBranch: ${{ github.ref_name }}\n\nPlease check the logs for more details."
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
