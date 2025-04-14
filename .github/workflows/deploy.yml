@@ -54,13 +54,26 @@ jobs:
           images: |
             geraldobl58/webapp:v${{ github.run_number }}
 
-      - name: Notify Deployment Failure
+      # Notifications
+      - name: Notify Success
+        if: success()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": "✅ CI/CD Pipeline completed successfully!\n\nDeployment Status:\n- Development: Success\n- Staging: Success\n- Production: Success\n\nCommit: ${{ github.sha }}\nBranch: ${{ github.ref_name }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      # Notify on failure
+      - name: Notify Failure
         if: failure()
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
             {
-              "text": "❌ ${{ inputs.environment-name }} Deployment Failed!\n\nEnvironment: ${{ inputs.environment-name }}\nCommit: ${{ github.sha }}\nBranch: ${{ github.ref_name }}\n\nPlease check the logs for more details."
+              "text": "❌ CI/CD Pipeline failed!\n\nFailed Jobs:\n${{ join(needs.*.result, '\n') }}\n\nCommit: ${{ github.sha }}\nBranch: ${{ github.ref_name }}\n\nPlease check the logs for more details."
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
