@@ -86,6 +86,31 @@ jobs:
             geraldobl58/webapp:v${{ github.run_number }}
             geraldobl58/webapp:latest
 
+  # Deploy
+  deploy-dvelopment:
+    needs: [CD]
+    uses: geraldobl58/webapp/.github/workflows/deploy.yml@main
+    secrets: inherit
+    with:
+      environment-name: development
+      environment-url: http://165.227.240.220
+
+  deploy-staging:
+    needs: [CD]
+    uses: geraldobl58/webapp/.github/workflows/deploy.yml@main
+    secrets: inherit
+    with:
+      environment-name: staging
+      environment-url: http://165.227.240.220
+
+  deploy-production:
+    needs: [CD]
+    uses: geraldobl58/webapp/.github/workflows/deploy.yml@main
+    secrets: inherit
+    with:
+      environment-name: producao
+      environment-url: http://165.227.240.221
+
   # Notifications
   Notify:
     needs: [CI, Tests, CD]
