@@ -2,68 +2,51 @@ name: CI/CD Pipeline
 
 on:
   workflow_call:
-    inputs:
-      environment-name:
-        required: true
-        type: string
-      environment-url:
-        required: true
-        type: string
+    # inputs:
+    #   environment-name:
+    #     required: true
+    #     type: string
+    #   environment-url:
+    #     required: true
+    #     type: string
 
 jobs:
   deploy:
     name: Deploy in Kubernetes
     runs-on: ubuntu-latest
-    environment:
-      name: ${{ inputs.environment-name }}
-      url: ${{ inputs.environment-url }}
+    # environment:
+    #   name: ${{ inputs.environment-name }}
+    #   url: ${{ inputs.environment-url }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
+      - name: Configure Context
+        uses: azure/k8s-set-context@v4
         with:
-          version: 'latest'
-
-      - name: Install doctl
-        run: |
-          wget https://github.com/digitalocean/doctl/releases/download/v1.102.0/doctl-1.102.0-linux-amd64.tar.gz
-          tar xf doctl-1.102.0-linux-amd64.tar.gz
-          sudo mv doctl /usr/local/bin
-          rm doctl-1.102.0-linux-amd64.tar.gz
-
-      - name: Authenticate doctl
-        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-      - name: Set Kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
-
-      - name: Update Deployment
-        run: sed -i "s|http://165.227.240.220|${{ vars.BASE_URL }}|g" k8s/deployment.yaml
+          method: kubeconfig
+          kubeconfig: ${{ secrets.K8S_CONFIG }}
 
       - name: Deploy to Kubernetes
         uses: azure/k8s-deploy@v5
         with:
-          namespace: ${{ inputs.K8S_NAMESPACE }}
           manifests: |
             k8s/deployment.yaml
           images: |
             geraldobl58/webapp:v${{ github.run_number }}
 
-      - name: Notify Deployment Failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "text": "❌ ${{ inputs.environment-name }} Deployment Failed!\n\nEnvironment: ${{ inputs.environment-name }}\nCommit: ${{ github.sha }}\nBranch: ${{ github.ref_name }}\n\nPlease check the logs for more details."
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      # - name: Notify Deployment Failure
+      #   if: failure()
+      #   uses: slackapi/slack-github-action@v1.23.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text": "❌ ${{ inputs.environment-name }} Deployment Failed!\n\nEnvironment: ${{ inputs.environment-name }}\nCommit: ${{ github.sha }}\nBranch: ${{ github.ref_name }}\n\nPlease check the logs for more details."
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
       # Notifications
       # - name: Notify Success

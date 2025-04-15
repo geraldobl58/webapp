@@ -91,25 +91,30 @@ jobs:
     needs: [CD]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
-    with:
-      environment-name: development
-      environment-url: http://165.227.240.220
 
-  deploy-staging:
-    needs: [CD]
-    uses: ./.github/workflows/deploy.yml
-    secrets: inherit
-    with:
-      environment-name: staging
-      environment-url: http://165.227.240.220
+  # deploy-development:
+  #   needs: [CD]
+  #   uses: ./.github/workflows/deploy.yml
+  #   secrets: inherit
+  #   with:
+  #     environment-name: development
+  #     environment-url: http://165.227.240.220
 
-  deploy-production:
-    needs: [CD]
-    uses: ./.github/workflows/deploy.yml
-    secrets: inherit
-    with:
-      environment-name: producao
-      environment-url: http://165.227.240.221
+  # deploy-staging:
+  #   needs: [CD]
+  #   uses: ./.github/workflows/deploy.yml
+  #   secrets: inherit
+  #   with:
+  #     environment-name: staging
+  #     environment-url: http://165.227.240.220
+
+  # deploy-production:
+  #   needs: [CD]
+  #   uses: ./.github/workflows/deploy.yml
+  #   secrets: inherit
+  #   with:
+  #     environment-name: producao
+  #     environment-url: http://165.227.240.221
 
   # Notifications
   # Notify:
