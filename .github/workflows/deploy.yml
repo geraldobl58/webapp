@@ -2,13 +2,13 @@ name: CI/CD Pipeline
 
 on:
   workflow_call:
-    inputs:
-      environment-name:
-        required: true
-        type: string
-      environment-url:
-        required: true
-        type: string
+    # inputs:
+    #   environment-name:
+    #     required: true
+    #     type: string
+    #   environment-url:
+    #     required: true
+    #     type: string
 
 jobs:
   deploy:

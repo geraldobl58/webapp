@@ -92,9 +92,9 @@ jobs:
     needs: [CD]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
-    with:
-      environment-name: development
-      environment-url: http://209.38.187.239
+    # with:
+    #   environment-name: development
+    #   environment-url: http://209.38.187.239
 
   # deploy-staging:
   #   needs: [CD]
