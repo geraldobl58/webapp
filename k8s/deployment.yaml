@@ -1,10 +1,9 @@
-# Deploy da Aplicação Web
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp
+  name: webapp-deployment
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: webapp
@@ -15,43 +14,6 @@ spec:
     spec:
       containers:
         - name: webapp
-          image: geraldobl58/webapp
-          resources:
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
-            requests:
-              cpu: "200m"
-              memory: "256Mi"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: webapp
-spec:
-  selector:
-    app: webapp
-  ports:
-    - port: 3000
-      targetPort: 3000
-  type: LoadBalancer
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: webapp
-  labels:
-    name: webapp
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: development.ogeraldoluiz.com
-      http:
-        paths:
-          - pathType: Prefix
-            path: "/"
-            backend:
-              service:
-                name: webapp
-                port:
-                  number: 3000
+          image: geraldobl58/webapp:latest
+          ports:
+            - containerPort: 80

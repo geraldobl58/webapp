@@ -31,6 +31,10 @@ jobs:
         run: doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          manifest: |
+            k8s/deployment.yaml
+            k8s/service.yaml
+            k8s/ingress.yaml
 
       - name: Configure Context
         uses: azure/k8s-set-context@v4
