@@ -39,8 +39,8 @@ spec:
   selector:
     app: webapp
   ports:
-    - port: 80
-      targetPort: 8080
+    - port: 3000
+      targetPort: 3000
       #nodePort: 30000
   type: LoadBalancer
 ---
@@ -62,4 +62,4 @@ spec:
               service:
                 name: webapp
                 port:
-                  number: 80
+                  number: 3000
