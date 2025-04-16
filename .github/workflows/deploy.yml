@@ -48,5 +48,8 @@ jobs:
           namespace: ${{ inputs.K8S_NAMESPACE }}
           manifests: |
             k8s/deployment.yaml
+            k8s/service.yaml
+            k8s/ingress.yaml
+            k8s/namespace.yaml
           images: |
             geraldobl58/handson-nestjs:v${{ github.run_number }}
