@@ -37,11 +37,26 @@ jobs:
           mkdir -p ~/.kube
           doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
 
-      - name: Set Kubernetes context
-        uses: azure/k8s-set-context@v3
+      # - name: Set Kubernetes context
+      #   uses: azure/k8s-set-context@v3
+      #   with:
+      #     kubeconfig: ${{ runner.temp }}/kubeconfig
+      #     context: ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
+
+      - name: Check cluster access
+        run: kubectl get nodes
+
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v5
         with:
-          kubeconfig: ${{ runner.temp }}/kubeconfig
-          context: ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
+          namespace: ${{ inputs.K8S_NAMESPACE }}
+          manifests: |
+            k8s/deployment.yaml
+            k8s/service.yaml
+            k8s/ingress.yaml
+            k8s/namespace.yaml
+          images: |
+            geraldobl58/handson-nestjs:v${{ github.run_number }}
 
       - name: Deploy to Kubernetes
         uses: azure/k8s-deploy@v5
