@@ -87,18 +87,14 @@ jobs:
             geraldobl58/webapp:latest
 
   # Deploy
+
   deploy-development:
     needs: [CD]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
-
-  # deploy-development:
-  #   needs: [CD]
-  #   uses: ./.github/workflows/deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     environment-name: development
-  #     environment-url: http://165.227.240.220
+    with:
+      environment-name: development
+      environment-url: http://209.38.187.239
 
   # deploy-staging:
   #   needs: [CD]
