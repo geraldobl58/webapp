@@ -2,21 +2,16 @@ name: CI/CD Pipeline
 
 on:
   workflow_call:
-    # inputs:
-    #   environment-name:
-    #     required: true
-    #     type: string
-    #   environment-url:
-    #     required: true
-    #     type: string
+    inputs:
+      K8S_NAMESPACE:
+        required: true
+        type: string
+        default: development
 
 jobs:
   deploy:
     name: Deploy in Kubernetes
     runs-on: ubuntu-latest
-    # environment:
-    #   name: ${{ inputs.environment-name }}
-    #   url: ${{ inputs.environment-url }}
 
     steps:
       - name: Checkout Repository
@@ -42,10 +37,10 @@ jobs:
           mkdir -p ~/.kube
           doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
 
-      # - name: Update Deployment
-      #   run: sed -i "s|http://165.227.240.220|${{ vars.BASE_URL }}|g" k8s/deployment.yaml
-
-
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v3
+        with:
+          namespace: ${{ inputs.K8S_NAMESPACE }}
 
       - name: Deploy to Kubernetes
         uses: azure/k8s-deploy@v5
