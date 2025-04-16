@@ -31,17 +31,17 @@ spec:
             requests:
               cpu: 500m
               memory: 512Mi
-          startupProbe:
-            httpGet:
-              path: /health
-              port: 3000
-            initialDelaySeconds: 60
+            # startupProbe:
+            #   httpGet:
+            #     path: /api/health
+            #     port: 3000
+            #   initialDelaySeconds: 60
             periodSeconds: 15
             timeoutSeconds: 10
             failureThreshold: 30
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 3000
             initialDelaySeconds: 90
             periodSeconds: 15
@@ -49,7 +49,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 3000
             initialDelaySeconds: 75
             periodSeconds: 15

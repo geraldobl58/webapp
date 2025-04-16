@@ -41,17 +41,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      # # Run linting
-      # - name: Linting
-      #   run: npm run lint
+      # Run linting
+      - name: Linting
+        run: npm run lint
 
-      # # Run tests
-      # - name: Testing
-      #   run: npm run test
-
-      # # Build the application
-      # - name: Build
-      #   run: npm run build
 
   # Test
   Tests:
