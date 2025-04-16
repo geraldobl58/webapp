@@ -2,8 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: webapp
+  namespace: development
+  labels:
+    app: webapp
 spec:
   replicas: 2
+  progressDeadlineSeconds: 900
   selector:
     matchLabels:
       app: webapp
@@ -19,18 +23,11 @@ spec:
             - containerPort: 3000
           env:
             - name: NODE_ENV
-              value: production
-            - name: NEXT_PUBLIC_API_URL
-              value: https://api-dev.meusite.com
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: webapp-service
-spec:
-  type: ClusterIP
-  selector:
-    app: webapp
-  ports:
-    - port: 80
-      targetPort: 3000
+              value: development
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
