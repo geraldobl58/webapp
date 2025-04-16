@@ -85,6 +85,8 @@ jobs:
     needs: [CD]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
+    with:
+      K8S_NAMESPACE: development
     # with:
     #   environment-name: development
     #   environment-url: http://209.38.187.239
