@@ -7,7 +7,7 @@ metadata:
     app: webapp
 spec:
   replicas: 2
-  progressDeadlineSeconds: 900
+  progressDeadlineSeconds: 1200
   selector:
     matchLabels:
       app: webapp
@@ -26,32 +26,32 @@ spec:
               value: production
           resources:
             limits:
-              cpu: "0.5"
-              memory: 512Mi
+              cpu: "1"
+              memory: 1Gi
             requests:
-              cpu: 250m
-              memory: 256Mi
+              cpu: 500m
+              memory: 512Mi
           startupProbe:
             httpGet:
               path: /health
               port: 3000
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
             failureThreshold: 30
           livenessProbe:
             httpGet:
               path: /health
               port: 3000
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 90
+            periodSeconds: 15
+            timeoutSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
               port: 3000
-            initialDelaySeconds: 45
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 75
+            periodSeconds: 15
+            timeoutSeconds: 10
             failureThreshold: 3
