@@ -88,6 +88,7 @@ jobs:
     with:
       environment-name: development
       environment-url: https://development.ogeraldoluiz.com
+      K8S_NAMESPACE: development
 
   deploy-staging:
     needs: [CD]
@@ -96,6 +97,7 @@ jobs:
     with:
       environment-name: staging
       environment-url: https://staging.ogeraldoluiz.com
+      K8S_NAMESPACE: staging
 
 
   deploy-production:
@@ -105,6 +107,7 @@ jobs:
     with:
       environment-name: production
       environment-url: https://production.ogeraldoluiz.com
+      K8S_NAMESPACE: production
 
   #Notifications
   Notify:
