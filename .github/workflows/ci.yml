@@ -79,6 +79,20 @@ jobs:
             geraldobl58/webapp:v${{ github.run_number }}
             geraldobl58/webapp:latest
 
+      - name: Detect deployed environment
+        id: deployed-env
+        run: |
+          if [ "${{ needs.deploy-production.result }}" == "success" ]; then
+            echo "DEPLOY_ENV=production" >> $GITHUB_ENV
+          elif [ "${{ needs.deploy-staging.result }}" == "success" ]; then
+            echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
+          elif [ "${{ needs.deploy-development.result }}" == "success" ]; then
+            echo "DEPLOY_ENV=development" >> $GITHUB_ENV
+          else
+            echo "DEPLOY_ENV=unknown" >> $GITHUB_ENV
+          fi
+
+
   # Deploy
   deploy-development:
     needs: [CD]
@@ -106,6 +120,108 @@ jobs:
       environment-url: https://production.ogeraldoluiz.com
 
   #Notifications
+  Notify:
+    needs: [CI, Tests, CD, deploy-development, deploy-staging, deploy-production]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set failed jobs list with emojis
+        if: failure()
+        run: |
+          failed=""
+          declare -A results=(
+            [CI]="${{ needs.CI.result }}"
+            [Tests]="${{ needs.Tests.result }}"
+            [CD]="${{ needs.CD.result }}"
+            [deploy-development]="${{ needs.deploy-development.result }}"
+            [deploy-staging]="${{ needs.deploy-staging.result }}"
+            [deploy-production]="${{ needs.deploy-production.result }}"
+          )
+
+          for job in "${!results[@]}"; do
+            result="${results[$job]}"
+            if [ "$result" != "success" ]; then
+              case "$result" in
+                failure) emoji="❌" ;;
+                cancelled) emoji="🚫" ;;
+                skipped) emoji="⏭️" ;;
+                *) emoji="⚠️" ;;
+              esac
+              failed="${failed}${emoji} ${job}: ${result}\\n"
+            fi
+          done
+
+          echo "FAILED_JOBS<<EOF" >> $GITHUB_ENV
+          echo -e "$failed" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Notify Success
+        if: success()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": "✅ CI/CD Pipeline completed successfully!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *CI/CD Pipeline completed successfully!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Environment:* `${{ env.DEPLOY_ENV }}`"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🔍 View Logs"
+                      },
+                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notify Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": "❌ CI/CD Pipeline failed!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "❌ *CI/CD Pipeline failed!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n\n*Failed Jobs:*\n${{ env.FAILED_JOBS }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🔍 View Logs"
+                      },
+                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+
+
   # Notify:
   #   needs: [CI, Tests, CD, deploy-development, deploy-staging, deploy-production]
   #   runs-on: ubuntu-latest
@@ -148,13 +264,13 @@ jobs:
   #       with:
   #         payload: |
   #           {
-  #             "text": "✅ *CI/CD Pipeline completed successfully!*",
+  #             "text": "✅ *CI/CD Pipeline completed successfully!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Environment:* `${{ env.DEPLOY_ENV }}`"
   #             "blocks": [
   #               {
   #                 "type": "section",
   #                 "text": {
   #                   "type": "mrkdwn",
-  #                   "text": "✅ *CI/CD Pipeline completed successfully!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
+  #                   "text": "✅ *CI/CD Pipeline completed successfully!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Environment:* `${{ env.DEPLOY_ENV }}`"
   #                 }
   #               },
   #               {
