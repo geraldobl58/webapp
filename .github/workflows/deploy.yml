@@ -60,4 +60,3 @@ jobs:
             k8s/service.yaml
             k8s/ingress.yaml
           images: geraldobl58/webapp:v${{ github.run_number }}
-          arguments: --timeout=600s
