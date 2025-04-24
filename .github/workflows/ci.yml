@@ -120,9 +120,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "✅ CI/CD Pipeline completed successfully!
-                ${{ github.actor }} in ${{ github.run_number }}",
-              ",
+              "text": "✅ CI/CD Pipeline completed successfully! Executed by ${{ github.actor }} in run #${{ github.run_number }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
