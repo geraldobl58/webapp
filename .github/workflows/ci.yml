@@ -101,7 +101,7 @@ jobs:
 
 
   deploy-production:
-    needs: [CD]
+    needs: [deploy-development, deploy-staging]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
