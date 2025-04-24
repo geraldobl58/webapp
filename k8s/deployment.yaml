@@ -2,12 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: webapp
-  # namespace: development
+  namespace: development
   labels:
     app: webapp
 spec:
   replicas: 2
-  progressDeadlineSeconds: 900
   selector:
     matchLabels:
       app: webapp
