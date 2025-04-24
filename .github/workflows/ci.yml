@@ -89,20 +89,40 @@ jobs:
       environment-url: https://development.ogeraldoluiz.com
 
   deploy-staging:
-    needs: [CD]
+    needs: [deploy-development]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
       environment-name: staging
       environment-url: https://staging.ogeraldoluiz.com
 
-  # deploy-production:
-  #   needs: [CD]
-  #   uses: ./.github/workflows/deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     environment-name: producao
-  #     environment-url: http://165.227.240.221
+  # Test
+  Unit-Test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup project
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
+
+  deploy-production:
+    needs: [Unit-Test]
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      environment-name: production
+      environment-url: https://production.ogeraldoluiz.com
 
   # Notifications
   # Notify:
