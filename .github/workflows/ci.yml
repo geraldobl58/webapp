@@ -79,19 +79,6 @@ jobs:
             geraldobl58/webapp:v${{ github.run_number }}
             geraldobl58/webapp:latest
 
-      - name: Detect deployed environment
-        id: deployed-env
-        run: |
-          if [ "${{ needs.deploy-production.result }}" == "success" ]; then
-            echo "DEPLOY_ENV=production" >> $GITHUB_ENV
-          elif [ "${{ needs.deploy-staging.result }}" == "success" ]; then
-            echo "DEPLOY_ENV=staging" >> $GITHUB_ENV
-          elif [ "${{ needs.deploy-development.result }}" == "success" ]; then
-            echo "DEPLOY_ENV=development" >> $GITHUB_ENV
-          else
-            echo "DEPLOY_ENV=unknown" >> $GITHUB_ENV
-          fi
-
 
   # Deploy
   deploy-development:
@@ -121,55 +108,55 @@ jobs:
 
   #Notifications
   Notify:
-  needs: [CI, Tests, CD, deploy-development, deploy-staging, deploy-production]
-  runs-on: ubuntu-latest
-  steps:
-    - name: Notify Success
-      if: success()
-      uses: slackapi/slack-github-action@v1.23.0
-      with:
-        payload: |
-          {
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "*✅ CI/CD Pipeline completed successfully!*"
-                }
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {
+    needs: [CI, Tests, CD, deploy-development, deploy-staging, deploy-production]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Success
+        if: success()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
                     "type": "mrkdwn",
-                    "text": "*Author:*\n${{ github.actor }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Branch:*\n${{ github.ref_name }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Commit:*\n<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*Workflow:*\n${{ github.workflow }}"
+                    "text": "*✅ CI/CD Pipeline completed successfully!*"
                   }
-                ]
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔍 View Logs>"
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Author:*\n${{ github.actor }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${{ github.ref_name }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Workflow:*\n${{ github.workflow }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|🔍 View Logs>"
+                  }
                 }
-              }
-            ]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
 
   # Notify:
