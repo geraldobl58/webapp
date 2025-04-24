@@ -80,24 +80,21 @@ jobs:
             geraldobl58/webapp:latest
 
   # Deploy
-
   deploy-development:
     needs: [CD]
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
-    # with:
-    #   K8S_NAMESPACE: development
-    # with:
-    #   environment-name: development
-    #   environment-url: http://209.38.187.239
+    with:
+      environment-name: development
+      environment-url: https://development.ogeraldoluiz.com
 
-  # deploy-staging:
-  #   needs: [CD]
-  #   uses: ./.github/workflows/deploy.yml
-  #   secrets: inherit
-  #   with:
-  #     environment-name: staging
-  #     environment-url: http://165.227.240.220
+  deploy-staging:
+    needs: [CD]
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      environment-name: staging
+      environment-url: https://staging.ogeraldoluiz.com
 
   # deploy-production:
   #   needs: [CD]

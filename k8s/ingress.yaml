@@ -2,16 +2,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: webapp
-  # namespace: development
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+  labels:
+    name: webapp
 spec:
+  ingressClassName: nginx
   rules:
     - host: development.ogeraldoluiz.com
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - pathType: Prefix
+            path: "/"
             backend:
               service:
                 name: webapp
