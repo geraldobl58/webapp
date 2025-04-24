@@ -127,108 +127,105 @@ jobs:
 
   #Notifications
   Notify:
-  needs: [CI, Tests, CD, deploy-development, deploy-staging, deploy-production]
-  runs-on: ubuntu-latest
-  steps:
-    - name: Set failed jobs list with emojis
-      if: failure()
-      id: failed-jobs
-      run: |
-        failed=""
-        for job in CI Tests CD deploy-development deploy-staging deploy-production; do
-          result="${{ needs[job].result }}"
-          if [ "$result" != "success" ]; then
-            case "$result" in
-              failure) emoji="❌" ;;
-              cancelled) emoji="🚫" ;;
-              skipped) emoji="⏭️" ;;
-              *) emoji="⚠️" ;;
-            esac
-            failed="${failed}${emoji} ${job}: ${result}\n"
-          fi
-        done
-        echo "FAILED_JOBS<<EOF" >> $GITHUB_ENV
-        echo -e "$failed" >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
+    needs: [CI, Tests, CD, deploy-development, deploy-staging, deploy-production]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set failed jobs list with emojis
+        if: failure()
+        id: failed-jobs
+        run: |
+          failed=""
+          for job in CI Tests CD deploy-development deploy-staging deploy-production; do
+            result="${{ needs[job].result }}"
+            if [ "$result" != "success" ]; then
+              case "$result" in
+                failure)
+                  emoji="❌"
+                  ;;
+                cancelled)
+                  emoji="🚫"
+                  ;;
+                skipped)
+                  emoji="⏭️"
+                  ;;
+                *)
+                  emoji="⚠️"
+                  ;;
+              esac
+              failed="${failed}${emoji} ${job}: ${result}\n"
+            fi
+          done
+          echo "FAILED_JOBS<<EOF" >> $GITHUB_ENV
+          echo -e "$failed" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
-    - name: Capture end time
-      run: echo "END_TIME=$(date +%s)" >> $GITHUB_ENV
+      - name: Get start time
+        run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
 
-    - name: Calculate duration
-      id: duration
-      run: |
-        duration=$(( $END_TIME - $GITHUB_RUN_STARTED_AT_UNIX ))
-        mins=$((duration / 60))
-        secs=$((duration % 60))
-        echo "duration=${mins}m ${secs}s" >> $GITHUB_OUTPUT
-      env:
-        END_TIME: ${{ env.END_TIME }}
-        GITHUB_RUN_STARTED_AT_UNIX: ${{ github.event.workflow_run.created_at && (github.event.workflow_run.created_at | date: "+%s") }}
-
-    - name: Notify Success
-      if: success()
-      uses: slackapi/slack-github-action@v1.23.0
-      with:
-        payload: |
-          {
-            "text": "✅ *CI/CD Pipeline completed successfully!*",
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "✅ *CI/CD Pipeline completed successfully!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Duration:* ${{ steps.duration.outputs.duration }}"
-                }
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "🔍 View Logs"
-                    },
-                    "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      - name: Notify Success
+        if: success()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": "✅ *CI/CD Pipeline completed successfully!*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *CI/CD Pipeline completed successfully!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>"
                   }
-                ]
-              }
-            ]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-
-    - name: Notify Failure
-      if: failure()
-      uses: slackapi/slack-github-action@v1.23.0
-      with:
-        payload: |
-          {
-            "text": "❌ *CI/CD Pipeline failed!*",
-            "blocks": [
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "❌ *CI/CD Pipeline failed!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Duration:* ${{ steps.duration.outputs.duration }}\n\n*Failed Jobs:*\n${{ env.FAILED_JOBS }}"
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🔍 View Logs"
+                      },
+                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
                 }
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "🔍 View Logs"
-                    },
-                    "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Notify Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": "❌ *CI/CD Pipeline failed!*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "❌ *CI/CD Pipeline failed!*\n*Author:* ${{ github.actor }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n\n*Failed Jobs:*\n${{ env.FAILED_JOBS }}"
                   }
-                ]
-              }
-            ]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🔍 View Logs"
+                      },
+                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
 
