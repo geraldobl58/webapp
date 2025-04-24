@@ -160,7 +160,6 @@ jobs:
         with:
           payload: |
             {
-              "text": "✅ CI/CD Pipeline completed successfully!",
               "blocks": [
                 {
                   "type": "section",
