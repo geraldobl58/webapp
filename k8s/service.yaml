@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: webapp
-  namespace: development
+  # namespace: development
 
 spec:
   type: LoadBalancer
@@ -10,4 +10,4 @@ spec:
     app: webapp
   ports:
     - port: 80
-      targetPort: 3000 # Porta onde o NestJS está escutando no container
+      targetPort: 3000

@@ -2,11 +2,11 @@ name: CI/CD Pipeline
 
 on:
   workflow_call:
-    inputs:
-      K8S_NAMESPACE:
-        required: true
-        type: string
-        default: development
+    # inputs:
+    #   K8S_NAMESPACE:
+    #     required: true
+    #     type: string
+    #     default: development
 
 jobs:
   deploy:
@@ -14,58 +14,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
+       # Set Context
+      - name: Apply Kubernetes Context
+        uses: azure/k8s-set-context@v4
         with:
-          version: 'latest'
+          method: kubeconfig
+          kubeconfig: ${{ secrets.K8S_KUBECONFIG }}
 
-      - name: Install doctl
-        run: |
-          wget https://github.com/digitalocean/doctl/releases/download/v1.102.0/doctl-1.102.0-linux-amd64.tar.gz
-          tar xf doctl-1.102.0-linux-amd64.tar.gz
-          sudo mv doctl /usr/local/bin
-          rm doctl-1.102.0-linux-amd64.tar.gz
-
-      - name: Authenticate doctl
-        run: doctl auth init --access-token ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
+      # Set Kubeconfig
       - name: Set Kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          doctl kubernetes cluster kubeconfig save ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
-
-      # - name: Set Kubernetes context
-      #   uses: azure/k8s-set-context@v3
-      #   with:
-      #     kubeconfig: ${{ runner.temp }}/kubeconfig
-      #     context: ${{ secrets.DIGITALOCEAN_CLUSTER_NAME }}
-
-      - name: Check cluster access
-        run: kubectl get nodes
-
-      - name: Deploy to Kubernetes
         uses: azure/k8s-deploy@v5
         with:
-          namespace: ${{ inputs.K8S_NAMESPACE }}
           manifests: |
             k8s/deployment.yaml
             k8s/service.yaml
             k8s/ingress.yaml
             k8s/namespace.yaml
-          images: |
-            geraldobl58/handson-nestjs:v${{ github.run_number }}
-
-      - name: Deploy to Kubernetes
-        uses: azure/k8s-deploy@v5
-        with:
-          namespace: ${{ inputs.K8S_NAMESPACE }}
-          manifests: |
-            k8s/deployment.yaml
-            k8s/service.yaml
-            k8s/ingress.yaml
-            k8s/namespace.yaml
-          images: |
-            geraldobl58/handson-nestjs:v${{ github.run_number }}
+          images: geraldobl58/front-devops:v${{ github.run_number }}
