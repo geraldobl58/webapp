@@ -120,13 +120,9 @@ jobs:
         with:
           payload: |
             {
-              "text": "✅ CI/CD Pipeline completed successfully!",
-              "attachments": [
-                {
-                  "text": "Author: ${{ github.actor }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nDuration: ${{ job.status }}",
-                  "color": "#36a64f"
-                }
-              ]
+              "text": "✅ CI/CD Pipeline completed successfully!
+                ${{ github.actor }} in ${{ github.run_number }}",
+              ",
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

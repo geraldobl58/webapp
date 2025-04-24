@@ -44,9 +44,11 @@ jobs:
           sed -i 's/namespace: development/namespace: ${{ inputs.K8S_NAMESPACE }}/g' k8s/deployment.yaml
           sed -i 's/namespace: development/namespace: ${{ inputs.K8S_NAMESPACE }}/g' k8s/service.yaml
           sed -i 's/namespace: development/namespace: ${{ inputs.K8S_NAMESPACE }}/g' k8s/ingress.yaml
+          sed -i 's/host: development.ogeraldoluiz.com/host: ${{ inputs.environment-url }}/g' k8s/ingress.yaml
 
         # run: |
         #   sed -i 's/host: development.ogeraldoluiz.com/host:${{ vars.BASE_URL }}/g' k8s/deployment.yaml
+
       # Deploy to Kubernetes
       - name: Deploy to Kubernetes
         uses: azure/k8s-deploy@v5
