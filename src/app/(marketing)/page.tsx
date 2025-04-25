@@ -3,7 +3,7 @@ import { Header } from '@/components/header'
 const Home = () => {
   return (
     <div>
-      <div>Home - V1</div>
+      <div>Home - V2</div>
       <Header />
     </div>
   )
