@@ -2,13 +2,6 @@ name: CI/CD Pipeline
 run-name: Pipeline CI/CD executed by ${{ github.actor }} in ${{ github.run_number }}
 
 on:
-  workflow_dispatch:
-    inputs:
-      action:
-        description: 'Action to perform (deploy/rollback)'
-        required: true
-        default: 'rollback'
-
   workflow_call:
     inputs:
       environment-name:
@@ -25,28 +18,6 @@ on:
         type: string
 
 jobs:
-
-  rollback:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.action == 'rollback' }}
-
-    steps:
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'v1.27.0'
-
-    - name: Authenticate with Kubernetes
-      env:
-        KUBECONFIG: ${{ secrets.KUBECONFIG }}
-      run: |
-        echo "$KUBECONFIG" > kubeconfig.yaml
-        export KUBECONFIG=kubeconfig.yaml
-
-    - name: Rollback Deployment
-      run: |
-        kubectl rollout undo deployment/webapp
-
   deploy:
     name: Deploy in Kubernetes
     runs-on: ubuntu-latest
@@ -93,3 +64,46 @@ jobs:
             k8s/service.yaml
             k8s/ingress.yaml
           images: geraldobl58/webapp:v${{ github.run_number }}
+
+  rollback:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.action == 'rollback' }}
+
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.27.0'
+
+      - name: Authenticate with Kubernetes
+        env:
+          KUBECONFIG: ${{ secrets.K8S_KUBECONFIG }}
+        run: |
+          echo "$KUBECONFIG" > kubeconfig.yaml
+          export KUBECONFIG=kubeconfig.yaml
+
+      - name: Check Deployment Status
+        run: |
+          if ! kubectl rollout status deployment/webapp --namespace=${{ inputs.K8S_NAMESPACE }} --timeout=60s; then
+            echo "Deployment is in a bad state. Proceeding with rollback..."
+          else
+            echo "Deployment is healthy. No rollback needed."
+            exit 0
+          fi
+
+      - name: Get Deployment Logs
+        run: |
+          kubectl logs deployment/webapp --namespace=${{ inputs.K8S_NAMESPACE }} || echo "No logs available."
+
+      - name: Rollback Deployment
+        run: |
+          kubectl rollout undo deployment/webapp --namespace=${{ inputs.K8S_NAMESPACE }}
+
+      - name: Verify Rollback
+        run: |
+          if ! kubectl rollout status deployment/webapp --namespace=${{ inputs.K8S_NAMESPACE }} --timeout=60s; then
+            echo "Rollback failed. Manual intervention required."
+            exit 1
+          else
+            echo "Rollback succeeded."
+          fi
